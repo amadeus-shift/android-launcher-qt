@@ -109,6 +109,16 @@ ApplicationWindow {
             }
          }
 
+        // Full-screen swipe-down area to open Springboard search
+        // Placed above the background but below page content so it doesn't obscure critical UI.
+        SearchSwipeArea {
+           anchors.fill: parent
+           vertical: true
+           minDistance: 120
+           maxOrthogonal: 100
+           z: 100
+        }
+
         property real outerSpacing: Screen.desktopAvailableWidth > 520 ? 100 : 0
         property real innerSpacing : Screen.desktopAvailableWidth > 520 ? 22 : 22 // 22.0
         property real componentSpacing: Screen.desktopAvailableWidth > 520 ? 32 : 22
