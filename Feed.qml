@@ -73,6 +73,13 @@ LauncherPage {
         anchors.fill: parent
         headerPositioning: mainView.backgroundOpacity === 1.0 ? ListView.PullBackHeader : ListView.InlineHeader
 
+        // enable left-edge swipe to open search (Springboard)
+        SearchSwipeArea {
+            anchors.left: parent.left
+            anchors.top: parent.top
+            anchors.bottom: parent.bottom
+        }
+
         header: Rectangle {
             id: header
             width: parent.width

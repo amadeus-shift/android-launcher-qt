@@ -293,6 +293,14 @@ LauncherPage {
             id: appLauncherColumn
             width: parent.width// - 2 * mainView.outerSpacing
 
+                // left-edge swipe to open global search (Springboard)
+                // uses SearchSwipeArea.qml (keeps gesture area narrow so normal taps still work)
+                SearchSwipeArea {
+                    anchors.left: parent.left
+                    anchors.top: parent.top
+                    anchors.bottom: parent.bottom
+                }
+
             Label {
                 id: headerTitle
                 topPadding: mainView.innerSpacing * 2

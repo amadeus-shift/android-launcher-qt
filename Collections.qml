@@ -145,6 +145,13 @@ LauncherPage {
         headerPositioning: mainView.backgroundOpacity === 1.0 ? ListView.PullBackHeader : ListView.InlineHeader
         clip: true
 
+        // left-edge swipe to open global search (Springboard)
+        SearchSwipeArea {
+            anchors.left: parent.left
+            anchors.top: parent.top
+            anchors.bottom: parent.bottom
+        }
+
         header: Column {
             id: header
             width: parent.width

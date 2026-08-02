@@ -10,6 +10,13 @@ LauncherPage {
     objectName: "detailPage"
     anchors.fill: parent
 
+    // left-edge swipe to open global search (Springboard)
+    SearchSwipeArea {
+        anchors.left: parent.left
+        anchors.top: parent.top
+        anchors.bottom: parent.bottom
+    }
+
     property var currentDetailMode: 0
     property var currentDetailId
     property var currentDetailAuthorAndDate: ""
