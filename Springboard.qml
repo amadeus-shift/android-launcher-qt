@@ -139,32 +139,7 @@ LauncherPage {
             clip: false  // WICHTIG: Damit der Header beim Ziehen sichtbar bleibt (Overbounds)
             headerPositioning: ListView.InlineHeader // Header ist Teil der scrollbaren Liste
 
-            // Einfache Logik: Prüfen beim Loslassen, ob wir weiter als 80px gezogen wurden
-            onMovementEnded: {
-                // contentY ist negativ, wenn man nach unten zieht (über den Anfang hinaus)
-                // -80 bedeutet: 80 Pixel nach unten gezogen
-                if (contentY < -80) {
-                    console.log("Trigger: Pull > 80px (ContentY: " + contentY + ")")
-
-                    if (textInputArea) {
-                        // Kurze Verzögerung, damit die visuelle Rückfederung beginnen kann
-                        Qt.callLater(function() {
-                            if (textInputArea.activeFocus) {
-                                // Tastatur war an -> jetzt ausschalten
-                                textInputArea.focus = false
-                                Qt.inputMethod.hide()
-                                console.log("Debug: Tastatur geschlossen")
-                            } else {
-                                // Tastatur war aus -> jetzt einschalten
-                                textInputArea.forceActiveFocus()
-                                Qt.inputMethod.show()
-                                console.log("Debug: Tastatur geöffnet")
-                            }
-                        })
-                    }
-                }
-                // Wenn < 80px gezogen: ListView federt automatisch zurück (Standardverhalten)
-            }
+            onMovementEnded: mainView.handleSearchPullDown(listView, textInputArea)
 
             header: Item {
                 width: parent.width

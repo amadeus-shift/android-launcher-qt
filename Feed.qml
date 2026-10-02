@@ -72,6 +72,7 @@ LauncherPage {
         id: listView
         anchors.fill: parent
         headerPositioning: mainView.backgroundOpacity === 1.0 ? ListView.PullBackHeader : ListView.InlineHeader
+        onMovementEnded: mainView.handleSearchPullDown(listView, textField)
 
         header: Rectangle {
             id: header

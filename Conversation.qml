@@ -191,6 +191,7 @@ LauncherPage {
         height: parent.height
         headerPositioning: mainView.backgroundOpacity === 1.0 ? ListView.PullBackHeader : ListView.InlineHeader
         footerPositioning: ListView.OverlayFooter  // mainView.backgroundOpacity === 1.0 ? ListView.OverlayFooter : ListView.InlineFooter
+        onMovementEnded: mainView.handleSearchPullDown(listView, textField)
 
         header: Column {
             id: header

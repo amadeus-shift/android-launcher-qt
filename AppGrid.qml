@@ -288,6 +288,7 @@ LauncherPage {
         anchors.fill: parent
         contentWidth: parent.width
         contentHeight: appLauncherColumn.height
+        onMovementEnded: mainView.handleSearchPullDown(appLauncherFlickable, headerTextField)
 
         Column {
             id: appLauncherColumn
