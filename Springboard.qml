@@ -72,16 +72,14 @@ LauncherPage {
 
     function updateShortcutMenuState(opened) {
         if (opened) {
-            shortcutMenu.height = shortcutColumn.height + mainView.innerSpacing * 1.5
-            shortcutBackground.width = roundedShortcutMenu ? parent.width - mainView.innerSpacing * 4 : parent.width
-            shortcutBackground.height = shortcutColumn.height
+            shortcutBackground.width = roundedShortcutMenu ? shortcutMenu.width - mainView.innerSpacing * 4 : shortcutMenu.width
+            shortcutBackground.height = shortcutMenu.height
             shortcutColumn.opacity = 1
         } else {
             shortcutBackground.width = dotShortcut ? mainView.innerSpacing * 2 : parent.width
             shortcutBackground.height = dotShortcut ? mainView.innerSpacing * 2 : mainView.innerSpacing
             shortcutColumn.opacity = 0
-            shortcutMenu.executeSelection()
-            shortcutMenu.selectedMenuItem = rootMenuButton
+            shortcutMenu.width = dotShortcut ? mainView.innerSpacing * 4 : mainView.innerSpacing * 3
             shortcutMenu.height = dotShortcut ? mainView.innerSpacing * 4 : mainView.innerSpacing * 3
         }
     }
@@ -138,9 +136,31 @@ LauncherPage {
         anchors.fill: parent
         headerPositioning: mainView.backgroundOpacity === 1.0 ? ListView.OverlayHeader : ListView.InlineHeader
 
+        onMovementEnded: {
+             if (contentY < -80) {
+                console.log("Trigger: Pull > 80px (ContentY: " + contentY + ")")
+
+                if (textInputArea) {
+                    Qt.callLater(function() {
+                        if (textInputArea.activeFocus) {
+                            textInputArea.focus = false
+                            Qt.inputMethod.hide()
+                            console.debug("Springboard | Hide keyboard")
+                        } else {
+                            textInputArea.forceActiveFocus()
+                            Qt.inputMethod.show()
+                            console.debug("Springboard | Show keyboard")
+
+                        }
+                    })
+                }
+            }
+            // Wenn < 80px gezogen: ListView federt automatisch zurück (Standardverhalten)
+        }
+
         header: Column {
-            id: header
             width: parent.width
+            anchors.top: parent.top
             z: 2
 
             Label {
@@ -153,7 +173,7 @@ LauncherPage {
                 font.weight: Font.Black
 
                 background: Rectangle {
-                    color:  mainView.backgroundOpacity === 1.0 ? mainView.backgroundColor : "transparent"
+                    color: mainView.backgroundOpacity === 1.0 ? mainView.backgroundColor : "transparent"
                     border.color: "transparent"
                 }
 
@@ -190,32 +210,17 @@ LauncherPage {
                         font.pointSize: mainView.largeFontSize
                         wrapMode: Text.WordWrap
                         inputMethodHints: Qt.ImhNoPredictiveText
-
-                        background: Rectangle {
-                            color:  mainView.backgroundOpacity === 1.0 ? mainView.backgroundColor : "transparent"
-                            border.color: "transparent"
-                        }
-
-                        Binding {
-                            target: springBoard
-                            property: "textInput"
-                            value: textArea.text
-                        }
-                        Binding {
-                            target: springBoard
-                            property: "textFocus"
-                            value: activeFocus
-                        }
-                        Binding {
-                            target: springBoard
-                            property: "textInputArea"
-                            value: textArea
-                        }
+                        background: Rectangle { color: "transparent"; border.color: "transparent" }
 
                         onActiveFocusChanged: {
                             headline.color = textArea.activeFocus ? "grey" : mainView.fontColor
                         }
+
+                        Binding { target: springBoard; property: "textInput"; value: textArea.text }
+                        Binding { target: springBoard; property: "textFocus"; value: activeFocus }
+                        Binding { target: springBoard; property: "textInputArea"; value: textArea }
                     }
+
                     ScrollBar.vertical: ScrollBar {}
                 }
 
@@ -225,21 +230,16 @@ LauncherPage {
                     text: "<font color='#808080'>×</font>"
                     font.pointSize: mainView.largeFontSize * 2
                     flat: true
-                    topPadding: mainView.innerSpacing === mainView.componentSpacing ? 0.0 : 18.0
                     visible: textArea.preeditText !== "" || textArea.text !== ""
-
-                    onClicked: {
-                        textArea.text = ""
-                        textArea.focus = false
-                    }
+                    onClicked: { textArea.text = ""; textArea.focus = false }
                 }
             }
 
             Rectangle {
                 width: parent.width
+                height: 1.1
                 color: mainView.backgroundOpacity === 1.0 ? Universal.background : "transparent"
                 border.color: "transparent"
-                height: 1.1
             }
         }
 
@@ -411,7 +411,7 @@ LauncherPage {
                     console.debug("Springboard | " + i + " group of contact: " + matches[i])
                 }
                 var firstName = matches[1]
-                var lastName = matches[2] !== undefined ? matches[1] : ""
+                var lastName = matches[2] !== undefined ? matches[2] : ""
                 var phoneNumber = matches[3]
                 var email = matches[4] !== undefined ? matches[4] : ""
                 var contact = { "name": firstName + " " + lastName, "phoneNumber" : phoneNumber }
@@ -549,6 +549,9 @@ LauncherPage {
                             break
                         case mainView.searchMode.MetaGer:
                             Qt.openUrlExternally("https://metager.de/meta/meta.ger3?eingabe=" + message + "&ref=hellovolla")
+                            break
+                        case mainView.searchMode.Brave:
+                            Qt.openUrlExternally("https://search.brave.com/search?q=" + message)
                             break
                         case mainView.searchMode.Custom:
                             Qt.openUrlExternally(mainView.searchEngineUrl + message)
@@ -1481,8 +1484,8 @@ LauncherPage {
             console.log("Springboard | entered")
 
             width = Screen.desktopAvailableWidth > 445 ? springBoard.menuWidth : springBoard.width
-            height = shortcutColumn.topPadding * 2 + shortcutColumn.bottomPadding
-                    + shortcutColumn.shortcutLabels.length * (mainView.largeFontSize + mainView.innerSpacing + 2)
+            height = shortcutColumn.topPadding + shortcutColumn.bottomPadding
+                    + shortcutColumn.shortcutLabels.length * shortcutColumn.shortcutLabelheight
 
             var rbPoint = mapFromItem(rootMenuButton, 0, 0)
             var touchY = dotShortcut ? rbPoint.y : rbPoint.y - rootMenuButton.height
@@ -1490,37 +1493,25 @@ LauncherPage {
             if (mouseX > rbPoint.x && mouseX < rbPoint.x + rootMenuButton.width
                     && mouseY > touchY && mouseY < touchY + touchHeight) {
                 console.log("Springboard | enable menu")
-                var shortcutBackgroundHeight = shortcutColumn.topPadding * 2 + shortcutColumn.bottomPadding
-                        + shortcutColumn.shortcutLabels.length * (mainView.largeFontSize + mainView.innerSpacing + 2)
-                shortcutBackground.width = roundedShortcutMenu ? shortcutMenu.width - mainView.innerSpacing * 4 : shortcutMenu.width
-                shortcutBackground.height = shortcutBackgroundHeight
-                shortcutColumn.opacity = 1
+                updateShortcutMenuState(true)
             }
         }
 
         onExited: {
             console.log("Springboard | exited")
             if (shortcutColumn.opacity > 0) {
-                shortcutBackground.width = dotShortcut ? mainView.innerSpacing * 2 : parent.width
-                shortcutBackground.height = dotShortcut ? mainView.innerSpacing * 2 : mainView.innerSpacing
-                shortcutColumn.opacity = 0
+                updateShortcutMenuState(false)
                 shortcutMenu.executeSelection()
                 selectedMenuItem = rootMenuButton
-                shortcutMenu.width = dotShortcut ? mainView.innerSpacing * 4 : mainView.innerSpacing * 3
-                shortcutMenu.height = dotShortcut ? mainView.innerSpacing * 4 : mainView.innerSpacing * 3
             }
         }
 
         onCanceled: {
             console.log("Springboard | cancelled")
             if (shortcutColumn.opacity > 0) {
-                shortcutBackground.width = dotShortcut ? mainView.innerSpacing * 2 : parent.width
-                shortcutBackground.height = dotShortcut ? mainView.innerSpacing * 2 : mainView.innerSpacing
-                shortcutColumn.opacity = 0
+                updateShortcutMenuState(false)
                 selectedMenuItem = rootMenuButton
-                shortcutMenu.width = dotShortcut ? mainView.innerSpacing * 4 : mainView.innerSpacing * 3
-                shortcutMenu.height = dotShortcut ? mainView.innerSpacing * 4 : mainView.innerSpacing * 3
-            }
+           }
         }
 
         onPositionChanged: {
@@ -1561,7 +1552,6 @@ LauncherPage {
                             console.debug("Springboard | Error: "+ component.errorString() )
                     }
                     var object = component.createObject(shortcutColumn, properties)
-                    shortcutColumn.shortcutLabelheight = object.height
                     shortcutColumn.shortcutLabels.push(object)
                 }
             }
@@ -1703,7 +1693,7 @@ LauncherPage {
 
             property int duration: 200
             property var shortcutLabels: new Array
-            property var shortcutLabelheight: 0
+            property var shortcutLabelheight: mainView.largeFontSize + mainView.innerSpacing + 8
 
             Behavior on opacity {
                 NumberAnimation {

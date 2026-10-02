@@ -1131,6 +1131,7 @@ LauncherPage {
                                     cNews.c_STITLE = rssFeed.name + " • Feed"
 
                                     var xmlString = doc.responseText
+                                    console.log("Collections | Response text length: " + doc.responseText.length)
                                     var startTag = "<item>"
                                     var closeTag = "</item>"
                                     var start = xmlString.indexOf(startTag, 0) + startTag.length
@@ -1152,7 +1153,7 @@ LauncherPage {
                                     }
                                     cNews.c_TEXT = xmlString.slice(start, end)
 
-                                    console.log("Collections | Start and end of item: " + start + ", " + end)
+                                    console.log("Collections | Start and end of title: " + start + ", " + end)
                                     console.log("Collection | Title: " + xmlString.slice(start, end))
 
                                     startTag = "<pubDate>"
