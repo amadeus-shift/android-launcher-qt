@@ -591,6 +591,10 @@ ApplicationWindow {
             toast.show()
         }
 
+        function getSetting(key) {
+            return settings[key]
+        }
+
         function switchTheme(theme, updateLockScreen) {
             settings.theme = theme
             if (settings.sync) {
@@ -927,7 +931,23 @@ ApplicationWindow {
         }
 
         function updateWidgets(widgetId, isVisible) {
-            springboard.children[0].item.updateWidgets(widgetId, isVisible)
+            switch (widgetId) {
+            case 0:
+                settings.weatherWgtIsVisible = isVisible
+                break
+            case 1:
+                settings.clockWgtIsVisible = isVisible
+                break
+            case 2:
+                settings.noteWgtIsVisible = isVisible
+                break
+            case 3:
+                settings.dialerWgtIsVisible = isVisible
+                break
+            default:
+                return
+            }
+            settings.sync()
         }
 
         function getSearchMode() {
@@ -1037,6 +1057,14 @@ ApplicationWindow {
                 mainView.accentTextColor = getContrastColor(mainView.accentColor)
             } else if (key === "keepLockscreenWallpaper") {
                 settings.keepLockscreenWallpaper = value
+            } else if (key === "useColoredIcons") {
+                settings.useColoredIcons = value
+            } else if (key === "showAppNames") {
+                settings.showAppNames = value
+            } else if (key === "useGroupedApps") {
+                settings.useGroupedApps = value
+            } else if (key === "useCategories") {
+                settings.useCategories = value
             }
             if (settings.sync) {
                 settings.sync()
@@ -1302,12 +1330,19 @@ ApplicationWindow {
         property bool sttChecked: false
         property bool signalIsActivated: false
         property bool useColoredIcons: false
+        property bool useGroupedApps: true
+        property bool useCategories: false
+        property bool showAppNames: true
         property bool showAppsAtStartup: false
         property bool useHapticMenus: true
         property bool leftHandedMenu: false
         property double blurEffect: 60.0
         property double lastContactsCheck: 0.0
         property string customAccentColor: ""
+        property bool clockWgtIsVisible: mainView.isTablet
+        property bool weatherWgtIsVisible: mainView.isTablet
+        property bool noteWgtIsVisible: mainView.isTablet
+        property bool dialerWgtIsVisible: false
 
         function checkCustomParameters() {
             var rawPresets = presets.readPresets()
