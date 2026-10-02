@@ -1234,9 +1234,9 @@ ApplicationWindow {
                     } else {
                         console.log("MainView | Invalid RSS feed url")
                     }
-                } else if (type === "volla.launcher.uiModeResponse") {
-                    console.debug("MainView | volla.launcher.uiModeResponse")
-                    mainView.switchTheme(message["uiMode"], false)
+                } else if (type === "volla.launcher.uiModeResponse" || type === "volla.launcher.uiModeChanged") {
+                    // Keep the explicitly selected launcher theme independent of Android's system mode.
+                    console.debug("MainView | Ignoring Android UI mode update: " + message["uiMode"])
                 } else if (type === "volla.launcher.messageResponse") {
                     console.log("MainView | onDispatched: " + type)
                     console.log("MainView | message: " + message["text"] + ", " + mainView.notifications[message["text"]])
@@ -1244,31 +1244,6 @@ ApplicationWindow {
                         mainView.showToast(qsTr(mainView.notifications[message["text"]]))
                     } else {
                         mainView.showToast(qsTr(mainView.notifications[message["text"]]))
-                    }
-                } else if (type === "volla.launcher.uiModeChanged") {
-                    console.debug("MainView | volla.launcher.uiModeChanged")
-                    if (message["uiMode"] !== settings.theme) {
-                        if (message["uiMode"] === mainView.theme.Light) {
-                            if (settings.theme === mainView.theme.DarkTranslucent) {
-                                mainView.switchTheme(mainView.theme.LightTranslucent, false)
-                                settings.theme = mainView.theme.LightTranslucent
-                                settings.sync()
-                            } else if (settings.theme === mainView.theme.Dark) {
-                                mainView.switchTheme(mainView.theme.Light, true)
-                                settings.theme = mainView.theme.Light
-                                settings.sync()
-                            }
-                        } else if (message["uiMode"] === mainView.theme.Dark) {
-                            if (settings.theme === mainView.theme.LightTranslucent) {
-                                mainView.switchTheme(mainView.theme.DarkTranslucent, false)
-                                settings.theme = mainView.theme.DarkTranslucent
-                                settings.sync()
-                            } else if (settings.theme === mainView.theme.Light) {
-                                mainView.switchTheme(mainView.theme.Dark, true)
-                                settings.theme = mainView.theme.Dark
-                                settings.sync()
-                            }
-                        }
                     }
                 } else if (type === "volla.launcher.checkSttAvailabilityResponse") {
                     console.debug("MainView | STT activation status: " + message["isActivated"])
