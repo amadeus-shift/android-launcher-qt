@@ -114,6 +114,9 @@ LauncherPage {
                             case mainView.theme.LightTranslucent:
                                 text = qsTr("Light Translucent Mode")
                                 break
+                            case mainView.theme.System:
+                                text = qsTr("Follow system theme")
+                                break
                             default:
                                 console.log("Settings | Unknown theme selected: " + mainView.theme)
                             }
@@ -180,11 +183,28 @@ LauncherPage {
 
                         leftPadding: mainView.innerSpacing
                         rightPadding: mainView.innerSpacing
-                        bottomPadding: mainView.innerSpacing * 2
+                        bottomPadding: mainView.innerSpacing
                         width: parent.width
                         visible: themeSettingsItem.menuState
                         text: qsTr("Light Translucent Mode")
                         boldText: themeSettingsItem.selectedMenuItem === lightTranslucentModeOption
+                        textColor: themeSettingsItem.menuState ? mainView.accentTextColor : "white"
+                        textOpacity: themeSettingsItem.labelOpacity
+                        backgroundColor: themeSettingsItem.menuState ? mainView.accentColor : "transparent"
+                        fontPointSize: mainView.mediumFontSize
+                    }
+                    HighlightButton {
+                        id: systemModeOption
+
+                        property var theme: mainView.theme.System
+
+                        leftPadding: mainView.innerSpacing
+                        rightPadding: mainView.innerSpacing
+                        bottomPadding: mainView.innerSpacing * 2
+                        width: parent.width
+                        visible: themeSettingsItem.menuState
+                        text: qsTr("Follow system theme")
+                        boldText: themeSettingsItem.selectedMenuItem === systemModeOption
                         textColor: themeSettingsItem.menuState ? mainView.accentTextColor : "white"
                         textOpacity: themeSettingsItem.labelOpacity
                         backgroundColor: themeSettingsItem.menuState ? mainView.accentColor : "transparent"
@@ -233,6 +253,7 @@ LauncherPage {
                     var secondPoint = mapFromItem(lightModeOption, 0, 0)
                     var thirdPoint = mapFromItem(darkTranslucentModeOption, 0, 0)
                     var forthPoint = mapFromItem(lightTranslucentModeOption, 0, 0)
+                    var fifthPoint = mapFromItem(systemModeOption, 0, 0)
                     if(firstPoint.y === 0){
                         firstPoint.y = firstPoint.y+darkModeOption.height
                     }
@@ -245,6 +266,9 @@ LauncherPage {
                     if(forthPoint.y === 0){
                         forthPoint.y = thirdPoint.y+darkModeOption.height
                     }
+                    if(fifthPoint.y === 0){
+                        fifthPoint.y = forthPoint.y+lightTranslucentModeOption.height
+                    }
 
                     var selectedItem
 
@@ -256,6 +280,8 @@ LauncherPage {
                         selectedItem = darkTranslucentModeOption
                     } else if (mouseY > forthPoint.y && mouseY < forthPoint.y + lightTranslucentModeOption.height) {
                         selectedItem = lightTranslucentModeOption
+                    } else if (mouseY > fifthPoint.y && mouseY < fifthPoint.y + systemModeOption.height) {
+                        selectedItem = systemModeOption
                     }else {
                         selectedItem = themeSettingsItemTitle
                     }
@@ -289,6 +315,10 @@ LauncherPage {
                             case mainView.theme.LightTranslucent:
                                 console.log("Setting | Enable Light translucent mode")
                                 mainView.switchTheme(mainView.theme.LightTranslucent, !mainView.getSetting("keepLockscreenWallpaper"))
+                                break
+                            case mainView.theme.System:
+                                console.log("Setting | Follow system theme")
+                                mainView.switchTheme(mainView.theme.System, !mainView.getSetting("keepLockscreenWallpaper"))
                                 break
                             default:
                                 console.log("Settings | Unknown theme selected: " + selectedTheme)

@@ -668,6 +668,11 @@
         <translation type="unfinished">Heller transparenter Modus</translation>
     </message>
     <message>
+        <location filename="../Settings.qml" line="195"/>
+        <source>Follow system theme</source>
+        <translation>Systemmodus verwenden</translation>
+    </message>
+    <message>
         <location filename="../Settings.qml" line="1216"/>
         <source>Display and menus</source>
         <translation type="unfinished">Anzeige und Menüs</translation>

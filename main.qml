@@ -150,7 +150,8 @@ ApplicationWindow {
             'Light': 0,
             'Dark': 1,
             'LightTranslucent': 2,
-            'DarkTranslucent': 3
+            'DarkTranslucent': 3,
+            'System': 4
         }
         property var actionType: {
             'SuggestContact': 0,
@@ -601,6 +602,23 @@ ApplicationWindow {
                 settings.sync()
             }
             console.log("MainView | Switch theme to " + theme + ", " + settings.theme)
+            if (theme === mainView.theme.System) {
+                AN.SystemDispatcher.dispatch("volla.launcher.colorAction", { "value": theme, "updateLockScreen": false})
+                return
+            }
+
+            applyThemeAppearance(theme)
+            AN.SystemDispatcher.dispatch("volla.launcher.colorAction", { "value": theme, "updateLockScreen": updateLockScreen})
+        }
+
+        function applySystemTheme(uiMode) {
+            if (settings.theme !== mainView.theme.System) {
+                return
+            }
+            applyThemeAppearance(uiMode === mainView.theme.Dark ? mainView.theme.Dark : mainView.theme.Light)
+        }
+
+        function applyThemeAppearance(theme) {
             switch (theme) {
             case mainView.theme.Dark:
                 Universal.theme = Universal.Dark
@@ -632,8 +650,6 @@ ApplicationWindow {
             }
             var item = itemAt(swipeIndex.Springboard)
             item.children[0].item.updateHeadlineColor()
-
-            AN.SystemDispatcher.dispatch("volla.launcher.colorAction", { "value": theme, "updateLockScreen": updateLockScreen})
         }
 
         // todo: Improve display date and time with third party library
@@ -1235,8 +1251,15 @@ ApplicationWindow {
                         console.log("MainView | Invalid RSS feed url")
                     }
                 } else if (type === "volla.launcher.uiModeResponse" || type === "volla.launcher.uiModeChanged") {
-                    // Keep the explicitly selected launcher theme independent of Android's system mode.
-                    console.debug("MainView | Ignoring Android UI mode update: " + message["uiMode"])
+                    console.debug("MainView | Android UI mode: " + message["uiMode"])
+                    mainView.applySystemTheme(message["uiMode"])
+                    if (type === "volla.launcher.uiModeChanged"
+                            && settings.theme === mainView.theme.System) {
+                        AN.SystemDispatcher.dispatch("volla.launcher.colorAction", {
+                            "value": mainView.theme.System,
+                            "updateLockScreen": false
+                        })
+                    }
                 } else if (type === "volla.launcher.messageResponse") {
                     console.log("MainView | onDispatched: " + type)
                     console.log("MainView | message: " + message["text"] + ", " + mainView.notifications[message["text"]])
